@@ -41,7 +41,7 @@ export default function Home() {
     setProjects((prevProjects) => [saved, ...prevProjects]);
     navigate(`/visualizer/${newId}`, {
       state: {
-        initialImage: saved.sourceImage,
+        initialImage: saved.source,
         initialRendered: saved.renderedImage || null,
         name,
       },
