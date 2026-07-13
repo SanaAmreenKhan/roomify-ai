@@ -69,11 +69,12 @@ export const uploadImageToHosting = async ({
     });
     await puter.fs.mkdir(dir, { createMissingParents: true });
     await puter.fs.write(filePath, uploadFile);
-    console.log("Uploaded file:", filePath);
-
-    const stat = await puter.fs.stat(filePath);
-
-    console.log("Uploaded stat:", stat);
+    // File uploaded successfully.
+    try {
+      await puter.fs.stat(filePath);
+    } catch (e) {
+      console.warn("Stat failed after upload (non-critical):", e);
+    }
 
     const hostedUrl = getHostedUrl({ subdomain: hosting.subdomain }, filePath);
     return hostedUrl ? { url: hostedUrl } : null;

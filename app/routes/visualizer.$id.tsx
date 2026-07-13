@@ -17,6 +17,13 @@ const VisualizerId = () => {
 
   const { userId } = useOutletContext<AuthContext>();
 
+  const [activeRouteId, setActiveRouteId] = useState<string>(id || "");
+
+  useEffect(() => {
+    setActiveRouteId(id || "");
+    hasInitialGenerated.current = false;
+  }, [id]);
+
   const hasInitialGenerated = useRef(false);
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -28,8 +35,8 @@ const VisualizerId = () => {
     navigate("/");
   };
 
-  const runGeneration = async (item: DesignItem) => {
-    if (!id || !item.sourceImage) return;
+  const runGeneration = async (item: DesignItem, targetId: string) => {
+    if (!targetId || !item.sourceImage) return;
 
     try {
       setIsProcessing(true);
@@ -52,7 +59,7 @@ const VisualizerId = () => {
           visibility: "private",
         });
 
-        if (saved) {
+        if (saved && activeRouteId === targetId) {
           setProject(saved);
           setCurrentImage(saved.renderedImage || result.renderedImage);
         }
@@ -60,7 +67,9 @@ const VisualizerId = () => {
     } catch (e) {
       console.error("generation failed", e);
     } finally {
-      setIsProcessing(false);
+      if (activeRouteId === targetId) {
+        setIsProcessing(false);
+      }
     }
   };
   useEffect(() => {
@@ -106,7 +115,7 @@ const VisualizerId = () => {
     }
 
     hasInitialGenerated.current = true;
-    void runGeneration(project);
+    void runGeneration(project, activeRouteId);
   }, [project, isProjectLoading]);
 
   return (

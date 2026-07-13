@@ -13,26 +13,9 @@ export const signOut = () => puter.auth.signOut();
 
 export const getCurrentUser = async () => {
   try {
-    await puter.kv.del("roomify_hosting_config");
-    console.log("Hosting config deleted");
-    const me = await puter.auth.getUser();
-
-    console.log("Frontend user:", me);
-
-    // TEMP TEST
-    const response = await puter.workers.exec(
-        `${PUTER_WORKER_URL}/api/test`,
-        {
-          method: "GET",
-        }
-    );
-
-    console.log("Test Status:", response.status);
-    console.log("Test Response:", await response.json());
-
-    return me;
+    return await puter.auth.getUser();
   } catch (e) {
-    console.error(e);
+    console.error("Failed to get current user:", e);
     return null;
   }
 };

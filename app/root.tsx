@@ -60,8 +60,6 @@ export default function App() {
     try {
       const user = await getCurrentUser();
 
-      console.log("User inside refreshAuth:", user);
-
       setAuthState({
         isSignedIn: !!user,
         userName: user?.username || null,
