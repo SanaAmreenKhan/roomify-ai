@@ -59,8 +59,9 @@ export default function App() {
   const refreshAuth = async () => {
     try {
       const user = await getCurrentUser();
+
       setAuthState({
-        isSignedIn: !!true,
+        isSignedIn: !!user,
         userName: user?.username || null,
         userId: user?.uuid || null,
       });

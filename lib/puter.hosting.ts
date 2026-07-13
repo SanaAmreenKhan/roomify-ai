@@ -8,27 +8,37 @@ import {
   imageUrlToPngBlob,
   isHostedUrl,
 } from "./utils";
-
 export const getOrCreateHostingConfig =
-  async (): Promise<HostingConfig | null> => {
-    const existing = (await puter.kv.get(
-      HOSTING_CONFIG_KEY,
-    )) as HostingConfig | null;
+    async (): Promise<HostingConfig | null> => {
+      const existing = (await puter.kv.get(
+          HOSTING_CONFIG_KEY,
+      )) as HostingConfig | null;
 
-    if (existing?.subdomain) return { subdomain: existing.subdomain };
+      console.log("Existing hosting:", existing);
 
-    const subdomain = createHostingSlug();
+      if (existing?.subdomain) return existing;
 
-    try {
-      const created = await puter.hosting.create(subdomain, ".");
-      const record = { subdomain: created.subdomain };
-      await puter.kv.set(HOSTING_CONFIG_KEY, record);
-      return record;
-    } catch (e) {
-      console.warn(`Could not find subdomain: ${e}`);
-      return null;
-    }
-  };
+      const subdomain = createHostingSlug();
+
+      console.log("Creating hosting:", subdomain);
+
+      try {
+        const created = await puter.hosting.create(subdomain, ".");
+
+        console.log("Hosting created response:", created);
+
+        const record = {
+          subdomain: created.subdomain,
+        };
+
+        await puter.kv.set(HOSTING_CONFIG_KEY, record);
+
+        return record;
+      } catch (e) {
+        console.error("Hosting create failed:", e);
+        return null;
+      }
+    };
 
 export const uploadImageToHosting = async ({
   hosting,
@@ -59,6 +69,12 @@ export const uploadImageToHosting = async ({
     });
     await puter.fs.mkdir(dir, { createMissingParents: true });
     await puter.fs.write(filePath, uploadFile);
+    // File uploaded successfully.
+    try {
+      await puter.fs.stat(filePath);
+    } catch (e) {
+      console.warn("Stat failed after upload (non-critical):", e);
+    }
 
     const hostedUrl = getHostedUrl({ subdomain: hosting.subdomain }, filePath);
     return hostedUrl ? { url: hostedUrl } : null;
